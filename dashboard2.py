@@ -138,11 +138,11 @@ if st.session_state.page == "Tentang":
         # Coba load dari Google Drive terlebih dahulu (link: https://drive.google.com/file/d/1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh/view?usp=sharing)
         # Pastikan file dibagikan secara publik (set ke "Anyone with the link can view")
         google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
-        google_drive_url = f"https://drive.google.com/thumbnail?id={google_drive_id}&sz=w300"  # Perbesar ukuran foto ke 300
+        google_drive_url = f"https://drive.google.com/thumbnail?id={google_drive_id}&sz=w200"
         
         image_loaded = False
         try:
-            st.image(google_drive_url, caption="Foto Developer", use_container_width=False, width=300)  # Perbesar width ke 300
+            st.image(google_drive_url, caption="Foto Developer", use_container_width=False, width=200)
             image_loaded = True
         except Exception as e:
             st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}. Mencoba path lokal...")
@@ -151,15 +151,14 @@ if st.session_state.page == "Tentang":
         if not image_loaded:
             photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
             if os.path.exists(photo_path):
-                st.image(photo_path, caption="Foto Developer", use_container_width=False, width=300)  # Perbesar width ke 300
+                st.image(photo_path, caption="Foto Developer", use_container_width=False, width=200)
             else:
                 st.warning("⚠️ Foto developer tidak ditemukan di path lokal. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
                 # Fallback ke placeholder
-                st.image("https://via.placeholder.com/300x375?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=300)  # Perbesar placeholder ke 300
+                st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
     
     with col_right:
-        st.markdown("""
-        <div style="font-size: 18px;">  <!-- Perbesar font ke 18px -->
+        st.write("""
         **Nama:** Cut Nisa Shafira  
         **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
         **Angkatan:** 2022  
@@ -168,8 +167,7 @@ if st.session_state.page == "Tentang":
         **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
         
         Developer mengembangkan dashboard aplikasi ini untuk memenuhi tugas praktikum mata kuliah pemrograman Big Data.
-        </div>
-        """, unsafe_allow_html=True)
+        """)
     
     st.markdown("---")
     
