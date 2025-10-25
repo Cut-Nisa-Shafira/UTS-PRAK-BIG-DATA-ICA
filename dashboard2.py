@@ -135,14 +135,27 @@ if st.session_state.page == "Tentang":
     col_left, col_right = st.columns([1, 1], gap="small")  # Ukuran kolom sama (1:1), gap kecil untuk jarak lebih dekat
     
     with col_left:
-        # Path foto developer (gunakan path relatif jika di repo GitHub, atau absolut jika lokal)
-        photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
-        if os.path.exists(photo_path):
-            st.image(photo_path, caption="Foto Developer", use_container_width=False, width=200)
-        else:
-            st.warning("⚠️ Foto developer tidak ditemukan. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
-            # Fallback ke placeholder
-            st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
+        # Coba load dari Google Drive terlebih dahulu (link: https://drive.google.com/file/d/1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh/view?usp=sharing)
+        # Pastikan file dibagikan secara publik (set ke "Anyone with the link can view")
+        google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
+        google_drive_url = f"https://drive.google.com/thumbnail?id={google_drive_id}&sz=w200"
+        
+        image_loaded = False
+        try:
+            st.image(google_drive_url, caption="Foto Developer", use_container_width=False, width=200)
+            image_loaded = True
+        except Exception as e:
+            st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}. Mencoba path lokal...")
+        
+        # Jika Google Drive gagal, coba path lokal
+        if not image_loaded:
+            photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
+            if os.path.exists(photo_path):
+                st.image(photo_path, caption="Foto Developer", use_container_width=False, width=200)
+            else:
+                st.warning("⚠️ Foto developer tidak ditemukan di path lokal. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
+                # Fallback ke placeholder
+                st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
     
     with col_right:
         st.write("""
@@ -152,7 +165,7 @@ if st.session_state.page == "Tentang":
         **Praktikum:** Pemrograman Big Data  
         **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
         
-        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
+        Developer mengembangkan dashboard aplikasi ini untuk memenuhi tugas praktikum mata kuliah pemrograman Big Data.
         """)
     
     st.markdown("---")
@@ -173,7 +186,7 @@ if st.session_state.page == "Tentang":
         - TensorFlow/Keras untuk klasifikasi.
         - Streamlit untuk antarmuka web yang interaktif.
         
-        Dibuat dengan ❤️ oleh tim AI Enthusiast. Jika ada pertanyaan, hubungi kami!
+        Dibuat dengan ❤️ oleh Cut Nisa Shafira. Jika ada pertanyaan, hubungi kami!
     """)
     st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_container_width=True)
 
