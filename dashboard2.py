@@ -21,7 +21,7 @@ st.set_page_config(
 st.markdown("""
     <style>
     .header {
-        background-color: #4CAF50;
+        background-color: #008080;  /* Teal Green */
         padding: 10px;
         border-radius: 10px;
         text-align: center;
@@ -30,9 +30,9 @@ st.markdown("""
         font-weight: bold;
     }
     .nav-button {
-        background-color: #f1f1f1;
+        background-color: #20B2AA;  /* Light Teal Green */
         border: none;
-        color: black;
+        color: white;
         padding: 10px 20px;
         text-align: center;
         text-decoration: none;
@@ -43,11 +43,11 @@ st.markdown("""
         border-radius: 5px;
     }
     .nav-button:hover {
-        background-color: #ddd;
+        background-color: #5F9EA0;  /* Darker Teal on hover */
     }
     .content {
         padding: 20px;
-        background-color: #f9f9f9;
+        background-color: #F0F8FF;  /* Light Teal-tinted background for content */
         border-radius: 10px;
         margin-top: 20px;
     }
@@ -146,13 +146,13 @@ if st.session_state.page == "Tentang":
     
     with col_right:
         st.write("""
-        **Nama:** Cut Nisa Shafira
+        **Nama:** Cut Nisa Shafira  
         **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
-        **Angkatan:** 2022
-        **Praktikum:** Pemrograman Big Data 
+        **Angkatan:** 2022  
+        **Praktikum:** Pemrograman Big Data  
         **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
         
-        Aplikasi ini dikembangkan untuk memenuhi tugas ujian tengah semester, Praktikum Pemrograman Big Data.
+        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
         """)
     
     st.markdown("---")
@@ -162,10 +162,10 @@ if st.session_state.page == "Tentang":
     st.write("""
         Selamat datang di **Image Classification & Detection App**! 🎉
         
-        Aplikasi ini dirancang untuk membantu Anda mengklasifikasikan gambar tanaman dan mendeteksi objek menggunakan teknologi canggih.
+        Aplikasi ini dirancang untuk membantu Anda mengklasifikasikan gambar tanaman dan mendeteksi objek menggunakan teknologi AI canggih.
         
         **Fitur Utama:**
-        - 🔍 **Deteksi Objek (YOLO)**: Deteksi objek dalam gambar secara real-time menggunakan model YOLOv8, diikuti dengan klasifikasi gambar jika diinginkan.
+        - 🔍 **Deteksi Objek (YOLO)**: Deteksi objek dalam gambar secara real-time menggunakan model YOLO, diikuti dengan klasifikasi gambar jika diinginkan.
         - 🧠 **Klasifikasi Gambar**: Unggah gambar tanaman dan dapatkan prediksi jenisnya (misalnya: jagung, jute, padi, gandum, tebu).
         
         **Teknologi yang Digunakan:**
@@ -173,7 +173,7 @@ if st.session_state.page == "Tentang":
         - TensorFlow/Keras untuk klasifikasi.
         - Streamlit untuk antarmuka web yang interaktif.
         
-        Dibuat dengan ❤️ oleh Cut Nisa Shafira. Jika ada pertanyaan, hubungi kami!
+        Dibuat dengan ❤️ oleh tim AI Enthusiast. Jika ada pertanyaan, hubungi kami!
     """)
     st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_container_width=True)
 
@@ -335,7 +335,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Footer atraktif
 st.markdown("""
     <hr>
-    <div style="text-align: center; color: #666;">
+    <div style="text-align: center; color: #008080; font-weight: bold;">
         Dibuat dengan ❤️ menggunakan Streamlit. © 2023 AI App.
     </div>
 """, unsafe_allow_html=True)
