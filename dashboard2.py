@@ -135,25 +135,24 @@ if st.session_state.page == "Tentang":
     col_left, col_right = st.columns([1, 2])  # Kolom kiri lebih kecil untuk foto
     
     with col_left:
-        # Path foto developer (gunakan path relatif jika di repo GitHub)
+        # Path foto developer (gunakan path relatif jika di repo GitHub, atau absolut jika lokal)
         photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
         if os.path.exists(photo_path):
-            st.image(photo_path, caption="Foto Developer", use_column_width=False, width=200)
+            st.image(photo_path, caption="Foto Developer", use_container_width=False, width=200)
         else:
             st.warning("⚠️ Foto developer tidak ditemukan. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
             # Fallback ke placeholder
-            st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_column_width=False, width=200)
+            st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
     
     with col_right:
         st.write("""
-        **Nama:** Tezza (AI Enthusiast)  
-        **Pekerjaan:** Data Scientist & AI Developer  
-        **Pendidikan:** S1 Teknik Informatika, Universitas ABC  
-        **Pengalaman:** 5+ tahun dalam pengembangan model Machine Learning, khususnya Computer Vision.  
-        **Minat:** AI, Deep Learning, dan aplikasi praktis untuk pertanian dan lingkungan.  
-        **Kontak:** tezza@example.com | LinkedIn: /tezza  
+        **Nama:** Cut Nisa Shafira
+        **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
+        **Angkatan:** 2022
+        **Praktikum:** Pemrograman Big Data 
+        **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
         
-        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
+        Aplikasi ini dikembangkan untuk memenuhi tugas ujian tengah semester, Praktikum Pemrograman Big Data.
         """)
     
     st.markdown("---")
@@ -163,10 +162,10 @@ if st.session_state.page == "Tentang":
     st.write("""
         Selamat datang di **Image Classification & Detection App**! 🎉
         
-        Aplikasi ini dirancang untuk membantu Anda mengklasifikasikan gambar tanaman dan mendeteksi objek menggunakan teknologi AI canggih.
+        Aplikasi ini dirancang untuk membantu Anda mengklasifikasikan gambar tanaman dan mendeteksi objek menggunakan teknologi canggih.
         
         **Fitur Utama:**
-        - 🔍 **Deteksi Objek (YOLO)**: Deteksi objek dalam gambar secara real-time menggunakan model YOLO, diikuti dengan klasifikasi gambar jika diinginkan.
+        - 🔍 **Deteksi Objek (YOLO)**: Deteksi objek dalam gambar secara real-time menggunakan model YOLOv8, diikuti dengan klasifikasi gambar jika diinginkan.
         - 🧠 **Klasifikasi Gambar**: Unggah gambar tanaman dan dapatkan prediksi jenisnya (misalnya: jagung, jute, padi, gandum, tebu).
         
         **Teknologi yang Digunakan:**
@@ -174,9 +173,9 @@ if st.session_state.page == "Tentang":
         - TensorFlow/Keras untuk klasifikasi.
         - Streamlit untuk antarmuka web yang interaktif.
         
-        Dibuat dengan ❤️ oleh tim AI Enthusiast. Jika ada pertanyaan, hubungi kami!
+        Dibuat dengan ❤️ oleh Cut Nisa Shafira. Jika ada pertanyaan, hubungi kami!
     """)
-    st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_column_width=True)
+    st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_container_width=True)
 
 elif st.session_state.page == "Deteksi Objek (YOLO)":
     st.title("🔍 Deteksi Objek (YOLO)")
@@ -189,7 +188,7 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
         
         if uploaded_file is not None:
             img = Image.open(uploaded_file).convert("RGB")
-            st.image(img, caption="📸 Gambar yang diunggah", use_column_width=True)
+            st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
             img_np = np.array(img)
 
             # --- Deteksi Objek dengan YOLO ---
@@ -197,7 +196,7 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                 try:
                     results = yolo_model(img_np)
                     result_img = results[0].plot()
-                    st.image(result_img, caption="📦 Hasil Deteksi YOLO", use_column_width=True)
+                    st.image(result_img, caption="📦 Hasil Deteksi YOLO", use_container_width=True)
 
                     st.subheader("📋 Daftar Deteksi:")
                     detections = []
@@ -217,7 +216,7 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                             box = results[0].boxes[0]  # Ambil box pertama
                             x1, y1, x2, y2 = map(int, box.xyxy[0])  # Koordinat bounding box
                             cropped_img = img.crop((x1, y1, x2, y2))  # Crop gambar
-                            st.image(cropped_img, caption="✂️ Gambar yang Dicrop dari Deteksi", use_column_width=False, width=200)
+                            st.image(cropped_img, caption="✂️ Gambar yang Dicrop dari Deteksi", use_container_width=False, width=200)
                             
                             # Simpan cropped_img untuk klasifikasi
                             st.session_state.cropped_img = cropped_img
@@ -288,7 +287,7 @@ elif st.session_state.page == "Klasifikasi Gambar":
 
     if uploaded_file is not None:
         img = Image.open(uploaded_file).convert("RGB")
-        st.image(img, caption="📸 Gambar yang diunggah", use_column_width=True)
+        st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
 
         if keras_model:
             with st.spinner("🧠 Mengklasifikasikan gambar..."):
