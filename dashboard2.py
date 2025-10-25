@@ -10,8 +10,8 @@ import os
 # KONFIGURASI DASHBOARD
 # ==========================
 st.set_page_config(
-    page_title="🧠 Image Classification & Object Detection App",
-    page_icon="🧠",
+    page_title="📷 Image Classification & Object Detection App",
+    page_icon="📷",
     layout="wide"
 )
 
@@ -350,6 +350,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown("""
     <hr>
     <div style="text-align: center; color: #008080; font-weight: bold;">
-        Dibuat dengan ❤️ oleh Cut Nisa Shafira. © 2023 AI App.
+        Dibuat dengan ❤️ oleh Cut Nisa Shafira. © 2025 AI App.
     </div>
 """, unsafe_allow_html=True)
