@@ -4,14 +4,16 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
-import cv2
 import os
-import pickle
 
 # ==========================
-# CONFIGURASI DASHBOARD
+# KONFIGURASI DASHBOARD
 # ==========================
-st.set_page_config(page_title="Image Classification & Object Detection App", page_icon="🧠", layout="wide")
+st.set_page_config(
+    page_title="🧠 Image Classification & Object Detection App",
+    page_icon="🧠",
+    layout="wide"
+)
 
 st.title("🧠 Image Classification & Object Detection App")
 
@@ -20,23 +22,35 @@ st.title("🧠 Image Classification & Object Detection App")
 # ==========================
 @st.cache_resource
 def load_models():
-    # --- Load YOLO model ---
     yolo_model = None
+    keras_model = None
+
+    # --- Load YOLO ---
     try:
         if os.path.exists("model/ica_Laporan4.pt"):
             yolo_model = YOLO("model/ica_Laporan4.pt")
         else:
             st.warning("⚠️ File model YOLO tidak ditemukan di folder /model/")
-    except (EOFError, pickle.UnpicklingError):
-        st.error("❌ File YOLO .pt rusak atau tidak lengkap. Harap unggah ulang model.")
     except Exception as e:
         st.error(f"❌ Gagal memuat model YOLO: {e}")
 
-    # --- Load Keras model ---
-    keras_model = None
+    # --- Load Keras ---
     try:
-        keras_model = tf.keras.models.load_model("model/ica_laporan2.keras", compile=False)
-        keras_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        if os.path.exists("model/ica_laporan2.keras"):
+            keras_model = tf.keras.models.load_model(
+                "model/ica_laporan2.keras",
+                compile=False,
+                safe_mode=False  # ✅ penting untuk kompatibilitas versi TF baru
+            )
+            keras_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        elif os.path.exists("model/ica_laporan2_fixed"):
+            keras_model = tf.keras.models.load_model(
+                "model/ica_laporan2_fixed",
+                compile=False
+            )
+            keras_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        else:
+            st.warning("⚠️ File model Keras tidak ditemukan di folder /model/")
     except Exception as e:
         st.error(f"❌ Gagal memuat model Keras: {e}")
 
@@ -57,7 +71,7 @@ uploaded_file = st.file_uploader("Unggah Gambar", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file).convert("RGB")
-    st.image(img, caption="Gambar yang diunggah", use_column_width=True)
+    st.image(img, caption="📸 Gambar yang diunggah", use_column_width=True)
     img_np = np.array(img)
 
     # ==========================
@@ -69,9 +83,9 @@ if uploaded_file is not None:
                 try:
                     results = yolo_model(img_np)
                     result_img = results[0].plot()
-                    st.image(result_img, caption="Hasil Deteksi YOLO", use_column_width=True)
+                    st.image(result_img, caption="📦 Hasil Deteksi YOLO", use_column_width=True)
 
-                    st.subheader("📦 Hasil Deteksi:")
+                    st.subheader("📋 Daftar Deteksi:")
                     for box in results[0].boxes:
                         cls_id = int(box.cls)
                         label = yolo_model.names[cls_id]
@@ -89,9 +103,11 @@ if uploaded_file is not None:
         if keras_model:
             with st.spinner("🧠 Mengklasifikasikan gambar..."):
                 try:
+                    # Sesuaikan ukuran input model
                     input_shape = keras_model.input_shape[1:3]
                     img_resized = img.resize(input_shape)
 
+                    # Preprocessing
                     x = image.img_to_array(img_resized)
                     x = np.expand_dims(x, axis=0) / 255.0
 
@@ -100,9 +116,10 @@ if uploaded_file is not None:
                     class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
 
                     st.subheader("📊 Hasil Klasifikasi:")
-                    st.write(f"Prediksi: **{class_names[pred_class]}**")
-                    st.write(f"Probabilitas: {np.max(preds)*100:.2f}%")
+                    st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
+                    st.write(f"📈 **Probabilitas:** {np.max(preds)*100:.2f}%")
+
                 except Exception as e:
                     st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
         else:
-            st.warning("⚠️ Model Keras belum dimuat.")
+            st.warning("⚠️ Model Keras belum berhasil dimuat.")
