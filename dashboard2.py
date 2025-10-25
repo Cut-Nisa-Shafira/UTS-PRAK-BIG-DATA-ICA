@@ -135,9 +135,10 @@ if st.session_state.page == "Tentang":
     col_left, col_right = st.columns([1, 2])  # Kolom kiri lebih kecil untuk foto
     
     with col_left:
-        # Gunakan foto dari Google Drive (link yang diberikan: https://drive.google.com/file/d/1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh/view?usp=sharing)
+        # Gunakan foto dari Google Drive (link: https://drive.google.com/file/d/1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh/view?usp=sharing)
+        # Pastikan file dibagikan secara publik (set ke "Anyone with the link can view")
         google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
-        google_drive_url = f"https://drive.google.com/uc?export=view&id={google_drive_id}"
+        google_drive_url = f"https://drive.google.com/thumbnail?id={google_drive_id}&sz=w200"  # Gunakan thumbnail untuk kompatibilitas
         
         try:
             st.image(
@@ -147,7 +148,7 @@ if st.session_state.page == "Tentang":
                 width=200
             )
         except Exception as e:
-            st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}")
+            st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}. Pastikan file dibagikan secara publik.")
             st.image(
                 "https://via.placeholder.com/200x250?text=Developer+Photo",
                 caption="Foto Developer (Placeholder)",
@@ -160,10 +161,10 @@ if st.session_state.page == "Tentang":
         **Nama:** Cut Nisa Shafira  
         **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
         **Angkatan:** 2022  
-        **Praktikum:** Pemrograman Big Data  
+        **Praktikum:** Pemrograman Big Data P1
         **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
         
-        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
+        Dashboard Aplikasi ini dibuat untuk memenuhi tugas Ujian Tengah Semester, Praktikum Pemrograman Big Data.
         """)
     
     st.markdown("---")
@@ -184,7 +185,7 @@ if st.session_state.page == "Tentang":
         - TensorFlow/Keras untuk klasifikasi.
         - Streamlit untuk antarmuka web yang interaktif.
         
-        Dibuat dengan ❤️ oleh tim AI Enthusiast. Jika ada pertanyaan, hubungi kami!
+        Dibuat dengan ❤️ oleh Cut Nisa Shafira. Jika ada pertanyaan, hubungi kami!
     """)
     st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_container_width=True)
 
