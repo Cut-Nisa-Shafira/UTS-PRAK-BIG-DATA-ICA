@@ -21,7 +21,7 @@ st.set_page_config(
 st.markdown("""
     <style>
     .header {
-        background-color: #008080;  /* Teal Green */
+        background-color: #4CAF50;
         padding: 10px;
         border-radius: 10px;
         text-align: center;
@@ -30,9 +30,9 @@ st.markdown("""
         font-weight: bold;
     }
     .nav-button {
-        background-color: #20B2AA;  /* Light Teal Green */
+        background-color: #f1f1f1;
         border: none;
-        color: white;
+        color: black;
         padding: 10px 20px;
         text-align: center;
         text-decoration: none;
@@ -43,11 +43,11 @@ st.markdown("""
         border-radius: 5px;
     }
     .nav-button:hover {
-        background-color: #5F9EA0;  /* Darker Teal on hover */
+        background-color: #ddd;
     }
     .content {
         padding: 20px;
-        background-color: #F0F8FF;  /* Light Teal-tinted background for content */
+        background-color: #f9f9f9;
         border-radius: 10px;
         margin-top: 20px;
     }
@@ -132,39 +132,27 @@ if st.session_state.page == "Tentang":
     
     # --- Biodata Developer ---
     st.subheader("👨‍💻 Biodata Developer")
-    col_left, col_right = st.columns([1, 2])  # Kolom kiri lebih kecil untuk foto
+    col_left, col_right = st.columns([1, 1], gap="small")  # Ukuran kolom sama (1:1), gap kecil untuk jarak lebih dekat
     
     with col_left:
-        # Gunakan foto dari Google Drive (link: https://drive.google.com/file/d/1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh/view?usp=sharing)
-        # Pastikan file dibagikan secara publik (set ke "Anyone with the link can view")
-        google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
-        google_drive_url = f"https://drive.google.com/thumbnail?id={google_drive_id}&sz=w200"  # Gunakan thumbnail untuk kompatibilitas
-        
-        try:
-            st.image(
-                google_drive_url,
-                caption="Foto Developer",
-                use_container_width=False,
-                width=200
-            )
-        except Exception as e:
-            st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}. Pastikan file dibagikan secara publik.")
-            st.image(
-                "https://via.placeholder.com/200x250?text=Developer+Photo",
-                caption="Foto Developer (Placeholder)",
-                use_container_width=False,
-                width=200
-            )
+        # Path foto developer (gunakan path relatif jika di repo GitHub, atau absolut jika lokal)
+        photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
+        if os.path.exists(photo_path):
+            st.image(photo_path, caption="Foto Developer", use_container_width=False, width=200)
+        else:
+            st.warning("⚠️ Foto developer tidak ditemukan. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
+            # Fallback ke placeholder
+            st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
     
     with col_right:
         st.write("""
         **Nama:** Cut Nisa Shafira  
         **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
         **Angkatan:** 2022  
-        **Praktikum:** Pemrograman Big Data P1
+        **Praktikum:** Pemrograman Big Data  
         **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
         
-        Dashboard Aplikasi ini dibuat untuk memenuhi tugas Ujian Tengah Semester, Praktikum Pemrograman Big Data.
+        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
         """)
     
     st.markdown("---")
@@ -185,7 +173,7 @@ if st.session_state.page == "Tentang":
         - TensorFlow/Keras untuk klasifikasi.
         - Streamlit untuk antarmuka web yang interaktif.
         
-        Dibuat dengan ❤️ oleh Cut Nisa Shafira. Jika ada pertanyaan, hubungi kami!
+        Dibuat dengan ❤️ oleh tim AI Enthusiast. Jika ada pertanyaan, hubungi kami!
     """)
     st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_container_width=True)
 
@@ -347,7 +335,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Footer atraktif
 st.markdown("""
     <hr>
-    <div style="text-align: center; color: #008080; font-weight: bold;">
+    <div style="text-align: center; color: #666;">
         Dibuat dengan ❤️ menggunakan Streamlit. © 2023 AI App.
     </div>
 """, unsafe_allow_html=True)
