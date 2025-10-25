@@ -20,7 +20,7 @@ st.title("🧠 Image Classification & Object Detection App")
 @st.cache_resource
 def load_models():
     try:
-        yolo_model = YOLO("model/ica_Laporan 4.pt")
+        yolo_model = YOLO("model/ica_Laporan4.pt")
     except Exception as e:
         st.error(f"❌ Gagal memuat model YOLO: {e}")
         yolo_model = None
@@ -96,7 +96,7 @@ if uploaded_file is not None:
                     pred_class = np.argmax(preds, axis=1)[0]
 
                     # Daftar label (ganti sesuai label model kamu)
-                    class_names = ["bengal", "domestic shorthair", "maine coon", "ragdoll", "siamese"]
+                    class_names = ["jute", "rice", "maize", "sugarcane", "wheat"]
 
                     st.subheader("📊 Hasil Klasifikasi:")
                     st.write(f"Prediksi: **{class_names[pred_class]}**")
