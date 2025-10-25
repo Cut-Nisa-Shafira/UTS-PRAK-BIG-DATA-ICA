@@ -1,7 +1,7 @@
-streamlit
-ultralytics
-tensorflow==2.15.0
-keras==2.15.0
+streamlit==1.50.0
+tensorflow==2.20.0
+keras==3.5.0
+ultralytics==8.3.230
 opencv-python-headless
 pillow
 numpy
