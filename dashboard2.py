@@ -85,16 +85,21 @@ def load_models():
     try:
         yolo_path = "model/ica_Laporan4.pt"
         if os.path.exists(yolo_path):
-            yolo_model = YOLO(yolo_path)
-            st.success("✅ Model YOLO berhasil dimuat.")
+            # Tambahan: Periksa ukuran file untuk mendeteksi korupsi
+            if os.path.getsize(yolo_path) == 0:
+                st.error("❌ File model YOLO kosong atau rusak. Periksa file Anda.")
+            else:
+                yolo_model = YOLO(yolo_path)
+                st.success("✅ Model YOLO berhasil dimuat.")
         else:
             st.warning("⚠️ File model YOLO tidak ditemukan di folder /model/")
     except Exception as e:
         st.error(f"❌ Gagal memuat model YOLO: {e}")
+        st.info("💡 Tips: Pastikan file .pt valid dan tidak rusak. Coba unduh ulang model atau periksa versi Ultralytics (pip install ultralytics --upgrade).")
 
     # --- Load Keras ---
     try:
-        keras_path = "model/ica_laporan2.h5"  # ✅ Diubah dari .keras ke .h5
+        keras_path = "model/ica_laporan2.h5"
         if os.path.exists(keras_path):
             keras_model = tf.keras.models.load_model(
                 keras_path,
@@ -146,15 +151,17 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
     st.title("🔍 Deteksi Objek (YOLO)")
     st.write("Unggah gambar untuk deteksi objek secara real-time menggunakan YOLO, diikuti dengan klasifikasi gambar jika diinginkan!")
     
-    uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="yolo_uploader")
-    
-    if uploaded_file is not None:
-        img = Image.open(uploaded_file).convert("RGB")
-        st.image(img, caption="📸 Gambar yang diunggah", use_column_width=True)
-        img_np = np.array(img)
+    if yolo_model is None:
+        st.error("❌ Model YOLO tidak tersedia. Fitur deteksi objek tidak dapat digunakan. Silakan periksa model YOLO.")
+    else:
+        uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="yolo_uploader")
+        
+        if uploaded_file is not None:
+            img = Image.open(uploaded_file).convert("RGB")
+            st.image(img, caption="📸 Gambar yang diunggah", use_column_width=True)
+            img_np = np.array(img)
 
-        # --- Deteksi Objek dengan YOLO ---
-        if yolo_model:
+            # --- Deteksi Objek dengan YOLO ---
             with st.spinner("🔍 Mendeteksi objek..."):
                 try:
                     results = yolo_model(img_np)
@@ -172,63 +179,79 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                     
                     if detections:
                         st.success(f"✅ Ditemukan {len(detections)} objek.")
+                        
+                        # --- Crop Gambar Berdasarkan Bounding Box Pertama ---
+                        # Ambil bounding box pertama (atau yang paling confident)
+                        if len(results[0].boxes) > 0:
+                            box = results[0].boxes[0]  # Ambil box pertama
+                            x1, y1, x2, y2 = map(int, box.xyxy[0])  # Koordinat bounding box
+                            cropped_img = img.crop((x1, y1, x2, y2))  # Crop gambar
+                            st.image(cropped_img, caption="✂️ Gambar yang Dicrop dari Deteksi", use_column_width=False, width=200)
+                            
+                            # Simpan cropped_img untuk klasifikasi
+                            st.session_state.cropped_img = cropped_img
+                        else:
+                            st.session_state.cropped_img = None
                     else:
                         st.info("ℹ️ Tidak ada objek terdeteksi.")
+                        st.session_state.cropped_img = None
                 except Exception as e:
                     st.error(f"❌ Terjadi kesalahan saat deteksi YOLO: {e}")
-        else:
-            st.warning("⚠️ Model YOLO belum berhasil dimuat.")
+                    st.session_state.cropped_img = None
 
-        # --- Lanjutkan dengan Klasifikasi Gambar ---
-        st.markdown("---")
-        st.subheader("🧠 Klasifikasi Gambar (Opsional)")
-        st.write("Jika ingin, lanjutkan dengan klasifikasi gambar menggunakan model Keras.")
-        
-        if st.button("🔄 Lakukan Klasifikasi", key="classify_after_yolo"):
-            if keras_model:
-                with st.spinner("🧠 Mengklasifikasikan gambar..."):
-                    try:
-                        # Sesuaikan ukuran input model
-                        input_shape = keras_model.input_shape[1:3]
-                        img_resized = img.resize(input_shape)
+            # --- Lanjutkan dengan Klasifikasi Gambar ---
+            st.markdown("---")
+            st.subheader("🧠 Klasifikasi Gambar (Opsional)")
+            st.write("Jika ingin, lanjutkan dengan klasifikasi gambar menggunakan model Keras. Jika ada objek terdeteksi, klasifikasi akan menggunakan gambar yang dicrop untuk akurasi lebih baik.")
+            
+            if st.button("🔄 Lakukan Klasifikasi", key="classify_after_yolo"):
+                # Gunakan cropped_img jika ada, jika tidak gunakan img asli
+                img_to_classify = st.session_state.get('cropped_img', img)
+                
+                if keras_model:
+                    with st.spinner("🧠 Mengklasifikasikan gambar..."):
+                        try:
+                            # Sesuaikan ukuran input model
+                            input_shape = keras_model.input_shape[1:3]
+                            img_resized = img_to_classify.resize(input_shape)
 
-                        # Preprocessing
-                        x = image.img_to_array(img_resized)
-                        x = np.expand_dims(x, axis=0) / 255.0
+                            # Preprocessing
+                            x = image.img_to_array(img_resized)
+                            x = np.expand_dims(x, axis=0) / 255.0
 
-                        preds = keras_model.predict(x)
-                        pred_class = np.argmax(preds, axis=1)[0]
-                        class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
+                            preds = keras_model.predict(x)
+                            pred_class = np.argmax(preds, axis=1)[0]
+                            class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
 
-                        st.subheader("📊 Hasil Klasifikasi:")
-                        st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
-                        st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
-                        
-                        # Perbaikan: Konversi ke float untuk progress bar
-                        max_prob = float(np.max(preds))
-                        st.progress(max_prob)
-                        
-                        # Tambahan: Emoji berdasarkan prediksi
-                        emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-                        st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
-                        
-                        # Tambahan: Tampilkan semua probabilitas kelas
-                        st.subheader("📊 Probabilitas Semua Kelas:")
-                        for i, prob in enumerate(preds[0]):
-                            st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
-                        
-                        # Tambahan: Peringatan jika probabilitas rendah
-                        if max_prob < 0.5:
-                            st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas atau latih ulang model.")
-                        
-                    except Exception as e:
-                        st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
-            else:
-                st.warning("⚠️ Model Keras belum berhasil dimuat.")
+                            st.subheader("📊 Hasil Klasifikasi:")
+                            st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
+                            st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
+                            
+                            # Perbaikan: Konversi ke float untuk progress bar
+                            max_prob = float(np.max(preds))
+                            st.progress(max_prob)
+                            
+                            # Tambahan: Emoji berdasarkan prediksi
+                            emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
+                            st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
+                            
+                            # Tambahan: Tampilkan semua probabilitas kelas
+                            st.subheader("📊 Probabilitas Semua Kelas:")
+                            for i, prob in enumerate(preds[0]):
+                                st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
+                            
+                            # Tambahan: Peringatan jika probabilitas rendah
+                            if max_prob < 0.5:
+                                st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas, fokus pada tanaman utama, atau latih ulang model.")
+                            
+                        except Exception as e:
+                            st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
+                else:
+                    st.warning("⚠️ Model Keras belum berhasil dimuat.")
 
 elif st.session_state.page == "Klasifikasi Gambar":
     st.title("🧠 Klasifikasi Gambar")
-    st.write("Unggah gambar tanaman untuk diklasifikasikan. Model AI kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
+    st.write("Unggah gambar tanaman untuk diklasifikasikan. Model kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
     
     uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="classify_uploader")
 
@@ -270,7 +293,7 @@ elif st.session_state.page == "Klasifikasi Gambar":
                     
                     # Tambahan: Peringatan jika probabilitas rendah
                     if max_prob < 0.5:
-                        st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas atau latih ulang model.")
+                        st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas, fokus pada tanaman utama, atau latih ulang model.")
                     
                 except Exception as e:
                     st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
