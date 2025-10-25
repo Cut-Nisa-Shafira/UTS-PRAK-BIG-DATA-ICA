@@ -94,7 +94,7 @@ def load_models():
 
     # --- Load Keras ---
     try:
-        keras_path = "model/ica_laporan2.keras"
+        keras_path = "model/ica_laporan2.h5"
         if os.path.exists(keras_path):
             keras_model = tf.keras.models.load_model(
                 keras_path,
