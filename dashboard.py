@@ -5,66 +5,104 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
 import cv2
+import os
 
 # ==========================
-# Load Models
+# CONFIGURASI DASHBOARD
+# ==========================
+st.set_page_config(page_title="Image Classification & Object Detection App", page_icon="🧠", layout="wide")
+
+st.title("🧠 Image Classification & Object Detection App")
+
+# ==========================
+# LOAD MODEL
 # ==========================
 @st.cache_resource
 def load_models():
-    # Muat model YOLO
-    yolo_model = YOLO("model/ica_Laporan4.pt")
-
-    # Muat model klasifikasi Keras
     try:
-        classifier = tf.keras.models.load_model(
-            "model/ica_laporan2.keras",
-            safe_mode=False,      # Matikan mode aman untuk model lama
-            compile=False         # Tidak perlu kompilasi ulang di tahap ini
-        )
-        st.success("✅ Model klasifikasi berhasil dimuat.")
+        yolo_model = YOLO("model/ica_Laporan 4.pt")
     except Exception as e:
-        st.error(f"⚠️ Gagal memuat model klasifikasi: {e}")
-        classifier = None
+        st.error(f"❌ Gagal memuat model YOLO: {e}")
+        yolo_model = None
 
-    return yolo_model, classifier
+    try:
+        keras_model = tf.keras.models.load_model("model/ica_laporan2.keras", compile=False)
+        keras_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    except Exception as e:
+        st.error(f"❌ Gagal memuat model Keras: {e}")
+        keras_model = None
+
+    return yolo_model, keras_model
 
 
-yolo_model, classifier = load_models()
+yolo_model, keras_model = load_models()
 
 # ==========================
-# UI
+# PILIH MODE
 # ==========================
-st.title("🧠 Image Classification & Object Detection App")
+mode = st.sidebar.selectbox("Pilih Mode:", ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"])
 
-menu = st.sidebar.selectbox("Pilih Mode:", ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"])
-
+# ==========================
+# UNGGAH GAMBAR
+# ==========================
 uploaded_file = st.file_uploader("Unggah Gambar", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file).convert("RGB")
-    st.image(img, caption="Gambar yang Diupload", use_container_width=True)
+    st.image(img, caption="Gambar yang diunggah", use_column_width=True)
 
-    if menu == "Deteksi Objek (YOLO)":
-        # Deteksi objek
-        results = yolo_model(img)
-        result_img = results[0].plot()  # hasil deteksi (gambar dengan box)
-        st.image(result_img, caption="Hasil Deteksi", use_container_width=True)
+    # Konversi ke numpy array
+    img_np = np.array(img)
 
-    elif menu == "Klasifikasi Gambar":
-        if classifier is None:
-            st.error("❌ Model klasifikasi belum berhasil dimuat. Tidak dapat melakukan prediksi.")
+    # ==========================
+    # MODE YOLO
+    # ==========================
+    if mode == "Deteksi Objek (YOLO)":
+        if yolo_model is not None:
+            with st.spinner("🔍 Mendeteksi objek..."):
+                results = yolo_model(img_np)
+                result_img = results[0].plot()  # Visualisasi hasil deteksi
+
+                # Tampilkan hasil
+                st.image(result_img, caption="Hasil Deteksi YOLO", use_column_width=True)
+
+                # Tampilkan label dan confidence
+                st.subheader("📦 Hasil Deteksi:")
+                for box in results[0].boxes:
+                    cls_id = int(box.cls)
+                    label = yolo_model.names[cls_id]
+                    conf = float(box.conf)
+                    st.write(f"- **{label}** ({conf:.2f})")
         else:
-            # Preprocessing
-            img_resized = img.resize((224, 224))  # sesuaikan ukuran dengan model kamu
-            img_array = image.img_to_array(img_resized)
-            img_array = np.expand_dims(img_array, axis=0)
-            img_array = img_array / 255.0
+            st.warning("Model YOLO belum dimuat.")
 
-            # Prediksi
-            prediction = classifier.predict(img_array)
-            class_index = int(np.argmax(prediction))
-            confidence = float(np.max(prediction))
+    # ==========================
+    # MODE KERAS
+    # ==========================
+    elif mode == "Klasifikasi Gambar":
+        if keras_model is not None:
+            with st.spinner("🧠 Mengklasifikasikan gambar..."):
+                try:
+                    # Pastikan ukuran input sesuai model
+                    input_shape = keras_model.input_shape[1:3]  # contoh: (224, 224)
+                    img_resized = img.resize(input_shape)
 
-            st.write("### 🔍 Hasil Prediksi:")
-            st.write(f"**Kelas:** {class_index}")
-            st.write(f"**Probabilitas:** {confidence:.4f}")
+                    # Preprocessing
+                    x = image.img_to_array(img_resized)
+                    x = np.expand_dims(x, axis=0)
+                    x = x / 255.0
+
+                    preds = keras_model.predict(x)
+                    pred_class = np.argmax(preds, axis=1)[0]
+
+                    # Daftar label (ganti sesuai label model kamu)
+                    class_names = ["bengal", "domestic shorthair", "maine coon", "ragdoll", "siamese"]
+
+                    st.subheader("📊 Hasil Klasifikasi:")
+                    st.write(f"Prediksi: **{class_names[pred_class]}**")
+                    st.write(f"Probabilitas: {np.max(preds)*100:.2f}%")
+
+                except Exception as e:
+                    st.error(f"Terjadi kesalahan saat klasifikasi: {e}")
+        else:
+            st.warning("Model Keras belum dimuat.")
