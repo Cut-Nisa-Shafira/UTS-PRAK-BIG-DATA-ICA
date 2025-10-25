@@ -129,6 +129,37 @@ st.markdown('<div class="content">', unsafe_allow_html=True)
 
 if st.session_state.page == "Tentang":
     st.title("📖 Tentang Aplikasi")
+    
+    # --- Biodata Developer ---
+    st.subheader("👨‍💻 Biodata Developer")
+    col_left, col_right = st.columns([1, 2])  # Kolom kiri lebih kecil untuk foto
+    
+    with col_left:
+        # Path foto developer (gunakan path relatif jika di repo GitHub)
+        photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
+        if os.path.exists(photo_path):
+            st.image(photo_path, caption="Foto Developer", use_column_width=False, width=200)
+        else:
+            st.warning("⚠️ Foto developer tidak ditemukan. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
+            # Fallback ke placeholder
+            st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_column_width=False, width=200)
+    
+    with col_right:
+        st.write("""
+        **Nama:** Tezza (AI Enthusiast)  
+        **Pekerjaan:** Data Scientist & AI Developer  
+        **Pendidikan:** S1 Teknik Informatika, Universitas ABC  
+        **Pengalaman:** 5+ tahun dalam pengembangan model Machine Learning, khususnya Computer Vision.  
+        **Minat:** AI, Deep Learning, dan aplikasi praktis untuk pertanian dan lingkungan.  
+        **Kontak:** tezza@example.com | LinkedIn: /tezza  
+        
+        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
+        """)
+    
+    st.markdown("---")
+    
+    # --- Informasi Tentang Aplikasi ---
+    st.subheader("ℹ️ Informasi Tentang Aplikasi")
     st.write("""
         Selamat datang di **Image Classification & Detection App**! 🎉
         
@@ -251,7 +282,7 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
 
 elif st.session_state.page == "Klasifikasi Gambar":
     st.title("🧠 Klasifikasi Gambar")
-    st.write("Unggah gambar tanaman untuk diklasifikasikan. Model kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
+    st.write("Unggah gambar tanaman untuk diklasifikasikan. Model AI kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
     
     uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="classify_uploader")
 
