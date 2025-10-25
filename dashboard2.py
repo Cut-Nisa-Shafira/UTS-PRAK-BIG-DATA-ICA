@@ -51,17 +51,6 @@ st.markdown("""
         border-radius: 10px;
         margin-top: 20px;
     }
-    /* Tambahan: Style untuk gambar agar lebih menarik */
-    .stImage img {
-        border: 3px solid #008080;  /* Bingkai teal */
-        border-radius: 15px;  /* Sudut melengkung */
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);  /* Bayangan untuk kedalaman */
-        transition: transform 0.3s ease, box-shadow 0.3s ease;  /* Transisi halus */
-    }
-    .stImage img:hover {
-        transform: scale(1.02);  /* Sedikit zoom saat hover */
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Bayangan lebih kuat saat hover */
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -206,25 +195,6 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
     st.title("🔍 Deteksi Objek (YOLO)")
     st.write("Unggah gambar untuk deteksi objek secara real-time menggunakan YOLO, diikuti dengan klasifikasi gambar jika diinginkan!")
     
-    # --- Tambahan: Contoh Jenis Tanaman ---
-    st.subheader("🌾 Contoh Jenis Tanaman yang Bisa Dideteksi")
-    st.write("Berikut adalah contoh gambar jenis tanaman yang dapat dideteksi oleh model YOLO kami:")
-    
-    # Daftar kelas dan emoji
-    class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
-    emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-    
-    # ID gambar dari Google Drive
-    google_drive_id_example = "11RMBTvKVck6ty4uoO56qEfQbDMEkQc4j"
-    
-    # Tampilkan dalam kolom (5 kolom untuk 5 kelas)
-    cols = st.columns(5)
-    for i, class_name in enumerate(class_names):
-        with cols[i]:
-            st.image(f"https://drive.google.com/thumbnail?id={google_drive_id_example}&sz=w1536&h=312", caption=f"{emoji_map[class_name]} {class_name.capitalize()}", use_container_width=False, width=1536)
-    
-    st.markdown("---")
-    
     if yolo_model is None:
         st.error("❌ Model YOLO tidak tersedia. Fitur deteksi objek tidak dapat digunakan. Silakan periksa model YOLO.")
     else:
@@ -327,25 +297,6 @@ elif st.session_state.page == "Klasifikasi Gambar":
     st.title("🧠 Klasifikasi Gambar")
     st.write("Unggah gambar tanaman untuk diklasifikasikan. Model AI kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
     
-    # --- Tambahan: Contoh Jenis Tanaman ---
-    st.subheader("🌾 Contoh Jenis Tanaman yang Bisa Diklasifikasikan")
-    st.write("Berikut adalah contoh gambar jenis tanaman yang dapat diklasifikasikan oleh model kami:")
-    
-    # Daftar kelas dan emoji
-    class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
-    emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-    
-    # ID gambar dari Google Drive
-    google_drive_id_example = "11RMBTvKVck6ty4uoO56qEfQbDMEkQc4j"
-    
-    # Tampilkan dalam kolom (5 kolom untuk 5 kelas)
-    cols = st.columns(5)
-    for i, class_name in enumerate(class_names):
-        with cols[i]:
-            st.image(f"https://drive.google.com/thumbnail?id={google_drive_id_example}&sz=w1536&h=312", caption=f"{emoji_map[class_name]} {class_name.capitalize()}", use_container_width=False, width=1536)
-    
-    st.markdown("---")
-    
     uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="classify_uploader")
 
     if uploaded_file is not None:
@@ -369,4 +320,36 @@ elif st.session_state.page == "Klasifikasi Gambar":
 
                     st.subheader("📊 Hasil Klasifikasi:")
                     st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
-                    st.write(f
+                    st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
+                    
+                    # Perbaikan: Konversi ke float untuk progress bar
+                    max_prob = float(np.max(preds))
+                    st.progress(max_prob)
+                    
+                    # Tambahan: Emoji berdasarkan prediksi
+                    emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
+                    st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
+                    
+                    # Tambahan: Tampilkan semua probabilitas kelas
+                    st.subheader("📊 Probabilitas Semua Kelas:")
+                    for i, prob in enumerate(preds[0]):
+                        st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
+                    
+                    # Tambahan: Peringatan jika probabilitas rendah
+                    if max_prob < 0.5:
+                        st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas, fokus pada tanaman utama, atau latih ulang model.")
+                    
+                except Exception as e:
+                    st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
+        else:
+            st.warning("⚠️ Model Keras belum berhasil dimuat.")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Footer atraktif
+st.markdown("""
+    <hr>
+    <div style="text-align: center; color: #008080; font-weight: bold;">
+        Dibuat dengan ❤️ oleh Cut Nisa Shafira. © 2025 AI App.
+    </div>
+""", unsafe_allow_html=True)
