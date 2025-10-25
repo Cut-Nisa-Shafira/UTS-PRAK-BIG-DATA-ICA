@@ -134,38 +134,37 @@ if st.session_state.page == "Tentang":
     st.subheader("👨‍💻 Biodata Developer")
     col_left, col_right = st.columns([1, 2])  # Kolom kiri lebih kecil untuk foto
     
-  with col_left:
-    # Gunakan foto dari Google Drive
-    google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
-    google_drive_url = f"https://drive.google.com/uc?export=view&id={google_drive_id}"
-
-    try:
-        st.image(
-            google_drive_url,
-            caption="Foto Developer",
-            use_container_width=False,
-            width=200
-        )
-    except Exception as e:
-        st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}")
-        st.image(
-            "https://via.placeholder.com/200x250?text=Developer+Photo",
-            caption="Foto Developer (Placeholder)",
-            use_container_width=False,
-            width=200
-        )
-
-with col_right:
-    st.write("""
-    **Nama:** Cut Nisa Shafira  
-    **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
-    **Angkatan:** 2022  
-    **Praktikum:** Pemrograman Big Data  
-    **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
-
-    Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
-    """)
-
+    with col_left:
+        # Gunakan foto dari Google Drive (link yang diberikan: https://drive.google.com/file/d/1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh/view?usp=sharing)
+        google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
+        google_drive_url = f"https://drive.google.com/uc?export=view&id={google_drive_id}"
+        
+        try:
+            st.image(
+                google_drive_url,
+                caption="Foto Developer",
+                use_container_width=False,
+                width=200
+            )
+        except Exception as e:
+            st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}")
+            st.image(
+                "https://via.placeholder.com/200x250?text=Developer+Photo",
+                caption="Foto Developer (Placeholder)",
+                use_container_width=False,
+                width=200
+            )
+    
+    with col_right:
+        st.write("""
+        **Nama:** Cut Nisa Shafira  
+        **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
+        **Angkatan:** 2022  
+        **Praktikum:** Pemrograman Big Data  
+        **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
+        
+        Developer ini berkomitmen untuk menciptakan solusi AI yang inovatif dan mudah digunakan, seperti aplikasi klasifikasi tanaman ini.
+        """)
     
     st.markdown("---")
     
