@@ -163,7 +163,8 @@ if st.session_state.page == "Tentang":
         **Jurusan:** S1 Statistika, Universitas Syiah Kuala  
         **Angkatan:** 2022  
         **Praktikum:** Pemrograman Big Data  
-        **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa  
+        **Asisten Lab:** Diaz Darsya Rizqullah | Musliadi
+        **Kontak:** cutnisa386@gmail.com | LinkedIn: Cut Nisa 
         
         Developer mengembangkan dashboard aplikasi ini untuk memenuhi tugas praktikum mata kuliah pemrograman Big Data.
         """)
