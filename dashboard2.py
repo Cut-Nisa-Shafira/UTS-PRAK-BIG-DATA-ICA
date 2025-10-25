@@ -94,7 +94,7 @@ def load_models():
 
     # --- Load Keras ---
     try:
-        keras_path = "model/ica_laporan2.h5"
+        keras_path = "model/ica_laporan2.h5"  # ✅ Diubah dari .keras ke .h5
         if os.path.exists(keras_path):
             keras_model = tf.keras.models.load_model(
                 keras_path,
@@ -204,12 +204,22 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                         st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
                         st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
                         
-                        # Tambahan atraktif: Progress bar untuk probabilitas
-                        st.progress(np.max(preds))
+                        # Perbaikan: Konversi ke float untuk progress bar
+                        max_prob = float(np.max(preds))
+                        st.progress(max_prob)
                         
                         # Tambahan: Emoji berdasarkan prediksi
                         emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
                         st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
+                        
+                        # Tambahan: Tampilkan semua probabilitas kelas
+                        st.subheader("📊 Probabilitas Semua Kelas:")
+                        for i, prob in enumerate(preds[0]):
+                            st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
+                        
+                        # Tambahan: Peringatan jika probabilitas rendah
+                        if max_prob < 0.5:
+                            st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas atau latih ulang model.")
                         
                     except Exception as e:
                         st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
@@ -245,12 +255,22 @@ elif st.session_state.page == "Klasifikasi Gambar":
                     st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
                     st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
                     
-                    # Tambahan atraktif: Progress bar untuk probabilitas
-                    st.progress(np.max(preds))
+                    # Perbaikan: Konversi ke float untuk progress bar
+                    max_prob = float(np.max(preds))
+                    st.progress(max_prob)
                     
                     # Tambahan: Emoji berdasarkan prediksi
                     emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
                     st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
+                    
+                    # Tambahan: Tampilkan semua probabilitas kelas
+                    st.subheader("📊 Probabilitas Semua Kelas:")
+                    for i, prob in enumerate(preds[0]):
+                        st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
+                    
+                    # Tambahan: Peringatan jika probabilitas rendah
+                    if max_prob < 0.5:
+                        st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas atau latih ulang model.")
                     
                 except Exception as e:
                     st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
