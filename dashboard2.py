@@ -134,15 +134,17 @@ if st.session_state.page == "Tentang":
     st.subheader("👨‍💻 Biodata Developer")
     col_left, col_right = st.columns([1, 2])  # Kolom kiri lebih kecil untuk foto
     
-    with col_left:
-        # Path foto developer (gunakan path relatif jika di repo GitHub, atau absolut jika lokal)
-        photo_path = "assets/Tezza_2024_10_20_190012490.jpg"
-        if os.path.exists(photo_path):
-            st.image(photo_path, caption="Foto Developer", use_container_width=False, width=200)
-        else:
-            st.warning("⚠️ Foto developer tidak ditemukan. Pastikan file gambar berada di folder 'assets' di direktori aplikasi.")
-            # Fallback ke placeholder
-            st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
+   with col_left:
+    # Gunakan foto dari Google Drive
+    google_drive_id = "1f_6kkQdVlo013ZR4c5KERL17PtzXv6nh"
+    google_drive_url = f"https://drive.google.com/uc?export=view&id={google_drive_id}"
+
+    try:
+        st.image(google_drive_url, caption="Foto Developer", use_container_width=False, width=200)
+    except Exception as e:
+        st.warning(f"⚠️ Gagal memuat foto dari Google Drive: {e}")
+        st.image("https://via.placeholder.com/200x250?text=Developer+Photo", caption="Foto Developer (Placeholder)", use_container_width=False, width=200)
+
     
     with col_right:
         st.write("""
