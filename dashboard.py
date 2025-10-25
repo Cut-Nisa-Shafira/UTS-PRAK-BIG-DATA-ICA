@@ -22,13 +22,15 @@ st.title("🧠 Image Classification & Object Detection App")
 # ==========================
 @st.cache_resource
 def load_models():
+    """Memuat model YOLO dan Keras dengan aman dan efisien."""
     yolo_model = None
     keras_model = None
 
     # --- Load YOLO ---
     try:
-        if os.path.exists("model/ica_Laporan4.pt"):
-            yolo_model = YOLO("model/ica_Laporan4.pt")
+        yolo_path = "model/ica_Laporan4.pt"
+        if os.path.exists(yolo_path):
+            yolo_model = YOLO(yolo_path)
         else:
             st.warning("⚠️ File model YOLO tidak ditemukan di folder /model/")
     except Exception as e:
@@ -36,19 +38,18 @@ def load_models():
 
     # --- Load Keras ---
     try:
-        if os.path.exists("model/ica_laporan2.keras"):
+        keras_path = "model/ica_laporan2.keras"
+        if os.path.exists(keras_path):
             keras_model = tf.keras.models.load_model(
-                "model/ica_laporan2.keras",
+                keras_path,
                 compile=False,
-                safe_mode=False  # ✅ penting untuk kompatibilitas versi TF baru
+                safe_mode=False  # ✅ untuk kompatibilitas TF >= 2.16
             )
-            keras_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-        elif os.path.exists("model/ica_laporan2_fixed"):
-            keras_model = tf.keras.models.load_model(
-                "model/ica_laporan2_fixed",
-                compile=False
+            keras_model.compile(
+                optimizer="adam",
+                loss="categorical_crossentropy",
+                metrics=["accuracy"]
             )
-            keras_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
         else:
             st.warning("⚠️ File model Keras tidak ditemukan di folder /model/")
     except Exception as e:
@@ -57,12 +58,16 @@ def load_models():
     return yolo_model, keras_model
 
 
+# Memanggil fungsi load_models()
 yolo_model, keras_model = load_models()
 
 # ==========================
 # PILIH MODE
 # ==========================
-mode = st.sidebar.selectbox("Pilih Mode:", ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"])
+mode = st.sidebar.selectbox(
+    "Pilih Mode:",
+    ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"]
+)
 
 # ==========================
 # UNGGAH GAMBAR
@@ -88,7 +93,7 @@ if uploaded_file is not None:
                     st.subheader("📋 Daftar Deteksi:")
                     for box in results[0].boxes:
                         cls_id = int(box.cls)
-                        label = yolo_model.names[cls_id]
+                        label = yolo_model.names.get(cls_id, "Unknown")
                         conf = float(box.conf)
                         st.write(f"- **{label}** ({conf:.2f})")
                 except Exception as e:
@@ -117,8 +122,7 @@ if uploaded_file is not None:
 
                     st.subheader("📊 Hasil Klasifikasi:")
                     st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
-                    st.write(f"📈 **Probabilitas:** {np.max(preds)*100:.2f}%")
-
+                    st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
                 except Exception as e:
                     st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
         else:
