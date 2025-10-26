@@ -389,4 +389,4 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                             
                             # Tambahan: Emoji berdasarkan prediksi
                             emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-                            st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred
+                            st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}
