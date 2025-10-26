@@ -21,59 +21,42 @@ st.set_page_config(
 st.markdown("""
     <style>
     .header {
-        background: linear-gradient(90deg, #008080, #20B2AA);
-        padding: 15px;
+        background-color: #008080;  /* Teal Green */
+        padding: 10px;
         border-radius: 10px;
         text-align: center;
         color: white;
-        font-size: 28px;
+        font-size: 24px;
         font-weight: bold;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .nav-container {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-top: 10px;
     }
     .nav-button {
-        background-color: #20B2AA;
+        background-color: #20B2AA;  /* Light Teal Green */
         border: none;
         color: white;
-        padding: 12px 24px;
+        padding: 10px 20px;
         text-align: center;
         text-decoration: none;
         display: inline-block;
         font-size: 16px;
-        font-weight: bold;
+        margin: 4px 2px;
         cursor: pointer;
-        border-radius: 8px;
-        transition: background-color 0.3s, transform 0.2s;
+        border-radius: 5px;
     }
     .nav-button:hover {
-        background-color: #5F9EA0;
-        transform: translateY(-2px);
+        background-color: #5F9EA0;  /* Darker Teal on hover */
     }
     .content {
         padding: 20px;
-        background-color: #F0F8FF;
+        background-color: #F0F8FF;  /* Light Teal-tinted background for content */
         border-radius: 10px;
         margin-top: 20px;
-    }
-    .image-label {
-        text-align: center;
-        font-weight: bold;
-        font-size: 18px;
-        color: #008080;
-        margin-bottom: 10px;
     }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="header">🌟 Selamat Datang di Image Classification & Detection App 🌟</div>', unsafe_allow_html=True)
 
-# Navigation buttons in a centered container
-st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+# Navigation buttons in header
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("🔍 Deteksi Objek (YOLO)", key="yolo"):
@@ -84,7 +67,6 @@ with col2:
 with col3:
     if st.button("📖 Tentang", key="about"):
         st.session_state.page = "Tentang"
-st.markdown('</div>', unsafe_allow_html=True)
 
 # Default page
 if "page" not in st.session_state:
@@ -108,6 +90,7 @@ def load_models():
                 st.error("❌ File model YOLO kosong atau rusak. Periksa file Anda.")
             else:
                 yolo_model = YOLO(yolo_path)
+                st.success("✅ Model YOLO berhasil dimuat.")
         else:
             st.warning("⚠️ File model YOLO tidak ditemukan di folder /model/")
     except Exception as e:
@@ -128,6 +111,7 @@ def load_models():
                 loss="categorical_crossentropy",
                 metrics=["accuracy"]
             )
+            st.success("✅ Model Keras berhasil dimuat.")
         else:
             st.warning("⚠️ File model Keras tidak ditemukan di folder /model/")
     except Exception as e:
@@ -218,6 +202,7 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
         
         if uploaded_file is not None:
             img = Image.open(uploaded_file).convert("RGB")
+            st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
             img_np = np.array(img)
 
             # --- Deteksi Objek dengan YOLO ---
@@ -225,15 +210,7 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                 try:
                     results = yolo_model(img_np)
                     result_img = results[0].plot()
-
-                    # Tampilkan gambar sebelum dan sesudah berdampingan
-                    col_before, col_after = st.columns(2)
-                    with col_before:
-                        st.markdown('<div class="image-label">📸 Gambar Asli</div>', unsafe_allow_html=True)
-                        st.image(img, use_container_width=True)
-                    with col_after:
-                        st.markdown('<div class="image-label">📦 Hasil Deteksi YOLO</div>', unsafe_allow_html=True)
-                        st.image(result_img, use_container_width=True)
+                    st.image(result_img, caption="📦 Hasil Deteksi YOLO", use_container_width=True)
 
                     st.subheader("📋 Daftar Deteksi:")
                     detections = []
