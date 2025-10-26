@@ -20,132 +20,43 @@ st.set_page_config(
 # ==========================
 st.markdown("""
     <style>
-    body {
-        background: linear-gradient(135deg, #E8F5E8, #F1F8E9);  /* Light green gradient background */
-        font-family: 'Arial', sans-serif;
-    }
     .header {
-        background: linear-gradient(135deg, #4CAF50, #81C784);  /* Soft green gradient */
-        padding: 15px;
-        border-radius: 15px;
+        background-color: #008080;  /* Teal Green */
+        padding: 10px;
+        border-radius: 10px;
         text-align: center;
         color: white;
-        font-size: 26px;
+        font-size: 24px;
         font-weight: bold;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        position: relative;
-        overflow: hidden;
-    }
-    .header::before {
-        content: '🌿🐾';
-        position: absolute;
-        top: 10px;
-        left: 20px;
-        font-size: 30px;
-        opacity: 0.7;
-    }
-    .header::after {
-        content: '🌸🦋';
-        position: absolute;
-        top: 10px;
-        right: 20px;
-        font-size: 30px;
-        opacity: 0.7;
     }
     .nav-button {
-        background-color: #66BB6A;  /* Light green */
+        background-color: #20B2AA;  /* Light Teal Green */
         border: none;
         color: white;
-        padding: 12px 24px;
+        padding: 10px 20px;
         text-align: center;
         text-decoration: none;
         display: inline-block;
         font-size: 16px;
         margin: 4px 2px;
         cursor: pointer;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 5px;
     }
     .nav-button:hover {
-        background-color: #43A047;  /* Darker green on hover */
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        background-color: #5F9EA0;  /* Darker Teal on hover */
     }
     .content {
-        padding: 25px;
-        background: rgba(255, 255, 255, 0.9);  /* Semi-transparent white */
-        border-radius: 15px;
+        padding: 20px;
+        background-color: #F0F8FF;  /* Light Teal-tinted background for content */
+        border-radius: 10px;
         margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        position: relative;
-    }
-    .content::before {
-        content: '🌳';
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 40px;
-        opacity: 0.3;
-        z-index: -1;
-    }
-    .content::after {
-        content: '🐦';
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        font-size: 40px;
-        opacity: 0.3;
-        z-index: -1;
     }
     .image-label {
         text-align: center;
         font-weight: bold;
         font-size: 18px;
-        color: #2E7D32;  /* Dark green */
+        color: #008080;
         margin-bottom: 10px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-    .animal-plant-bg {
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text fill="%234CAF50" font-size="20" y="50%">🌿🐾</text></svg>');
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 200px 200px;
-        opacity: 0.1;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-    }
-    .footer {
-        text-align: center;
-        color: #2E7D32;
-        font-weight: bold;
-        font-size: 16px;
-        margin-top: 30px;
-        padding: 15px;
-        background: linear-gradient(135deg, #C8E6C9, #A5D6A7);
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        position: relative;
-    }
-    .footer::before {
-        content: '🌍';
-        position: absolute;
-        left: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 24px;
-    }
-    .footer::after {
-        content: '🌱';
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 24px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -221,7 +132,7 @@ yolo_model, keras_model = load_models()
 # ==========================
 # PAGE CONTENT
 # ==========================
-st.markdown('<div class="content"><div class="animal-plant-bg"></div>', unsafe_allow_html=True)
+st.markdown('<div class="content">', unsafe_allow_html=True)
 
 if st.session_state.page == "Tentang":
     st.title("📖 Tentang Aplikasi")
@@ -398,4 +309,61 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
 
 elif st.session_state.page == "Klasifikasi Gambar":
     st.title("🧠 Klasifikasi Gambar")
-   
+    st.write("Unggah gambar tanaman untuk diklasifikasikan. Model AI kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
+    
+    uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="classify_uploader")
+
+    if uploaded_file is not None:
+        img = Image.open(uploaded_file).convert("RGB")
+        st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
+
+        if keras_model:
+            with st.spinner("🧠 Mengklasifikasikan gambar..."):
+                try:
+                    # Sesuaikan ukuran input model
+                    input_shape = keras_model.input_shape[1:3]
+                    img_resized = img.resize(input_shape)
+
+                    # Preprocessing
+                    x = image.img_to_array(img_resized)
+                    x = np.expand_dims(x, axis=0) / 255.0
+
+                    preds = keras_model.predict(x)
+                    pred_class = np.argmax(preds, axis=1)[0]
+                    class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
+
+                    st.subheader("📊 Hasil Klasifikasi:")
+                    st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
+                    st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
+                    
+                    # Perbaikan: Konversi ke float untuk progress bar
+                    max_prob = float(np.max(preds))
+                    st.progress(max_prob)
+                    
+                    # Tambahan: Emoji berdasarkan prediksi
+                    emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
+                    st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
+                    
+                    # Tambahan: Tampilkan semua probabilitas kelas
+                    st.subheader("📊 Probabilitas Semua Kelas:")
+                    for i, prob in enumerate(preds[0]):
+                        st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
+                    
+                    # Tambahan: Peringatan jika probabilitas rendah
+                    if max_prob < 0.5:
+                        st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas, fokus pada tanaman utama, atau latih ulang model.")
+                    
+                except Exception as e:
+                    st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
+        else:
+            st.warning("⚠️ Model Keras belum berhasil dimuat.")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Footer atraktif
+st.markdown("""
+    <hr>
+    <div style="text-align: center; color: #008080; font-weight: bold;">
+        Dibuat dengan ❤️ oleh Cut Nisa Shafira. © 2025 AI App.
+    </div>
+""", unsafe_allow_html=True)
