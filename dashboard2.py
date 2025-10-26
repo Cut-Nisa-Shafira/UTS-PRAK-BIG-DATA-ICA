@@ -116,6 +116,7 @@ def load_models():
     try:
         keras_path = "model/ica_laporan2.h5"
         if os.path.exists(keras_path):
+            # coba load, jika gagal akan ter-catch
             keras_model = tf.keras.models.load_model(
                 keras_path,
                 compile=False,
@@ -130,6 +131,7 @@ def load_models():
         else:
             st.warning("⚠️ File model Keras tidak ditemukan di folder /model/")
     except Exception as e:
+        # tangkap error load model dan berikan pesan yang ramah
         st.error(f"❌ Gagal memuat model Keras: {e}")
 
     return yolo_model, keras_model
@@ -224,11 +226,13 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                     if detections:
                         st.success(f"✅ Ditemukan {len(detections)} objek.")
                         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        # simpan hanya tipe dasar (hindari objek kompleks yang tidak bisa serialisasi)
                         st.session_state.history.append({
                             "timestamp": timestamp,
                             "type": "Deteksi Objek",
                             "result": f"{len(detections)} objek terdeteksi",
                             "details": ", ".join([f"{label} ({conf:.2f})" for label, conf in detections]),
+                            # menyimpan gambar PIL untuk tampilan saja (session_state dapat menahan objek kecil)
                             "image": img
                         })
                     else:
@@ -248,7 +252,9 @@ elif st.session_state.page == "Klasifikasi Gambar":
         img = Image.open(uploaded_file).convert("RGB")
         st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
 
-        if keras_model:
+        if keras_model is None:
+            st.warning("⚠️ Model Keras belum tersedia. Fitur klasifikasi tidak bisa digunakan.")
+        else:
             with st.spinner("🧠 Mengklasifikasikan gambar..."):
                 try:
                     input_shape = keras_model.input_shape[1:3]
@@ -288,8 +294,6 @@ elif st.session_state.page == "Klasifikasi Gambar":
 
                 except Exception as e:
                     st.error(f"❌ Kesalahan klasifikasi: {e}")
-        else:
-            st.warning("⚠️ Model Keras belum berhasil dimuat.")
 
 # --------------------------
 # HISTORI
@@ -298,36 +302,65 @@ elif st.session_state.page == "Histori":
     st.title("📊 Histori Prediksi")
     st.write("Riwayat prediksi Anda, termasuk gambar sebelumnya dan visualisasi distribusi hasil.")
 
-    if not st.session_state.history:
-        st.info("ℹ️ Belum ada riwayat prediksi.")
+    # Validasi history sebelum membuat DataFrame
+    history = st.session_state.get("history", [])
+    if not isinstance(history, list) or len(history) == 0:
+        st.info("ℹ️ Belum ada riwayat prediksi. Lakukan deteksi objek atau klasifikasi gambar terlebih dahulu!")
     else:
-        st.subheader("📋 Tabel Riwayat")
-        df_history = pd.DataFrame(st.session_state.history)
-        df_history = df_history.drop(columns=["image"])
-        st.dataframe(df_history, use_container_width=True)
+        # Pastikan setiap entri adalah dict dan berisi keys yang diharapkan
+        safe_entries = []
+        for entry in history:
+            if isinstance(entry, dict):
+                # Extract minimal fields and provide defaults bila perlu
+                safe_entries.append({
+                    "timestamp": entry.get("timestamp", ""),
+                    "type": entry.get("type", ""),
+                    "result": entry.get("result", ""),
+                    "details": entry.get("details", "")
+                })
 
-        if st.button("🗑️ Hapus Riwayat", key="clear_history"):
-            st.session_state.history = []
-            st.success("✅ Riwayat telah dibersihkan!")
-            st.rerun()
-
-        st.subheader("🖼️ Gambar Terbaru")
-        latest_entry = st.session_state.history[-1]
-        st.image(latest_entry["image"], caption=f"Gambar dari {latest_entry['type']} - {latest_entry['timestamp']}",
-                 use_container_width=True)
-
-        st.subheader("📈 Distribusi Jenis Prediksi")
-        results = [entry["result"] for entry in st.session_state.history if entry["type"] == "Klasifikasi Gambar"]
-        if results:
-            result_counts = pd.Series(results).value_counts()
-            fig, ax = plt.subplots()
-            result_counts.plot(kind="bar", ax=ax, color="#008080")
-            ax.set_title("Distribusi Prediksi Klasifikasi Gambar")
-            ax.set_xlabel("Jenis Tanaman")
-            ax.set_ylabel("Jumlah Prediksi")
-            st.pyplot(fig)
+        if len(safe_entries) == 0:
+            st.info("ℹ️ Riwayat tidak berisi entri yang dapat ditampilkan.")
         else:
-            st.info("ℹ️ Belum ada data klasifikasi untuk divisualisasikan.")
+            st.subheader("📋 Tabel Riwayat Prediksi")
+            df_history = pd.DataFrame(safe_entries)
+            st.dataframe(df_history, use_container_width=True)
+
+            # Tombol clear history
+            if st.button("🗑️ Clear History", key="clear_history"):
+                st.session_state.history = []
+                st.success("✅ Histori telah dibersihkan!")
+                st.experimental_rerun()
+
+            # Tampilkan gambar dari histori terbaru jika ada
+            st.subheader("🖼️ Gambar dari Prediksi Terbaru")
+            # Cari entri terakhir yang juga punya 'image'
+            latest_with_image = None
+            for e in reversed(history):
+                if isinstance(e, dict) and e.get("image") is not None:
+                    latest_with_image = e
+                    break
+            if latest_with_image:
+                try:
+                    st.image(latest_with_image["image"],
+                             caption=f"Gambar dari {latest_with_image.get('type','')} - {latest_with_image.get('timestamp','')}",
+                             use_container_width=True)
+                except Exception:
+                    st.info("⚠️ Gagal menampilkan gambar dari histori (format tidak dikenali).")
+
+            # Visualisasi grafik distribusi jenis prediksi (khusus klasifikasi)
+            st.subheader("📈 Distribusi Jenis Prediksi")
+            results = [entry.get("result") for entry in history if isinstance(entry, dict) and entry.get("type") == "Klasifikasi Gambar"]
+            if results:
+                result_counts = pd.Series(results).value_counts()
+                fig, ax = plt.subplots()
+                result_counts.plot(kind="bar", ax=ax, color="#008080")
+                ax.set_title("Distribusi Prediksi Klasifikasi Gambar")
+                ax.set_xlabel("Jenis Tanaman")
+                ax.set_ylabel("Jumlah Prediksi")
+                st.pyplot(fig)
+            else:
+                st.info("ℹ️ Belum ada prediksi klasifikasi gambar untuk divisualisasikan.")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
