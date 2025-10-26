@@ -51,6 +51,13 @@ st.markdown("""
         border-radius: 10px;
         margin-top: 20px;
     }
+    .image-label {
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        color: #008080;
+        margin-bottom: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -202,7 +209,6 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
         
         if uploaded_file is not None:
             img = Image.open(uploaded_file).convert("RGB")
-            st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
             img_np = np.array(img)
 
             # --- Deteksi Objek dengan YOLO ---
@@ -210,7 +216,15 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                 try:
                     results = yolo_model(img_np)
                     result_img = results[0].plot()
-                    st.image(result_img, caption="📦 Hasil Deteksi YOLO", use_container_width=True)
+
+                    # Tampilkan gambar sebelum dan sesudah berdampingan
+                    col_before, col_after = st.columns(2)
+                    with col_before:
+                        st.markdown('<div class="image-label">📸 Gambar Asli</div>', unsafe_allow_html=True)
+                        st.image(img, use_container_width=True)
+                    with col_after:
+                        st.markdown('<div class="image-label">📦 Hasil Deteksi YOLO</div>', unsafe_allow_html=True)
+                        st.image(result_img, use_container_width=True)
 
                     st.subheader("📋 Daftar Deteksi:")
                     detections = []
