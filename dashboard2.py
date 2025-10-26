@@ -41,9 +41,11 @@ st.markdown("""
         margin: 4px 2px;
         cursor: pointer;
         border-radius: 5px;
+        transition: background-color 0.3s, transform 0.2s;
     }
     .nav-button:hover {
         background-color: #5F9EA0;  /* Darker Teal on hover */
+        transform: translateY(-2px);
     }
     .content {
         padding: 20px;
@@ -58,26 +60,60 @@ st.markdown("""
         color: #008080;
         margin-bottom: 10px;
     }
+    .landing-title {
+        text-align: center;
+        font-size: 36px;
+        font-weight: bold;
+        color: #008080;
+        margin-bottom: 20px;
+    }
+    .landing-subtitle {
+        text-align: center;
+        font-size: 20px;
+        color: #5F9EA0;
+        margin-bottom: 30px;
+    }
+    .feature-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    .feature-card:hover {
+        transform: scale(1.05);
+    }
+    .fade-in {
+        animation: fadeIn 2s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="header">🌟 Selamat Datang di Image Classification & Detection App 🌟</div>', unsafe_allow_html=True)
 
-# Navigation buttons in header
-col1, col2, col3 = st.columns(3)
+# Navigation buttons in header (updated order: Home, Deteksi Objek, Klasifikasi Gambar, Tentang)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
+    if st.button("🏠 Home", key="home"):
+        st.session_state.page = "Home"
+with col2:
     if st.button("🔍 Deteksi Objek (YOLO)", key="yolo"):
         st.session_state.page = "Deteksi Objek (YOLO)"
-with col2:
+with col3:
     if st.button("🧠 Klasifikasi Gambar", key="classify"):
         st.session_state.page = "Klasifikasi Gambar"
-with col3:
+with col4:
     if st.button("📖 Tentang", key="about"):
         st.session_state.page = "Tentang"
 
-# Default page
+# Default page (updated to Home)
 if "page" not in st.session_state:
-    st.session_state.page = "Deteksi Objek (YOLO)"
+    st.session_state.page = "Home"
 
 # ==========================
 # LOAD MODEL
@@ -97,7 +133,6 @@ def load_models():
                 st.error("❌ File model YOLO kosong atau rusak. Periksa file Anda.")
             else:
                 yolo_model = YOLO(yolo_path)
-                st.success("✅ Model YOLO berhasil dimuat.")
         else:
             st.warning("⚠️ File model YOLO tidak ditemukan di folder /model/")
     except Exception as e:
@@ -118,7 +153,6 @@ def load_models():
                 loss="categorical_crossentropy",
                 metrics=["accuracy"]
             )
-            st.success("✅ Model Keras berhasil dimuat.")
         else:
             st.warning("⚠️ File model Keras tidak ditemukan di folder /model/")
     except Exception as e:
@@ -134,7 +168,71 @@ yolo_model, keras_model = load_models()
 # ==========================
 st.markdown('<div class="content">', unsafe_allow_html=True)
 
-if st.session_state.page == "Tentang":
+if st.session_state.page == "Home":
+    # Landing Page
+    st.markdown('<div class="landing-title fade-in">🏠 Selamat Datang di Home</div>', unsafe_allow_html=True)
+    st.markdown('<div class="landing-subtitle">Jelajahi fitur deteksi objek dan klasifikasi gambar dengan AI canggih!</div>', unsafe_allow_html=True)
+    
+    # Feature Overview
+    st.markdown("### 🌟 Fitur Unggulan Kami")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown("#### 🔍 Deteksi Objek (YOLO)")
+        st.write("Deteksi objek dalam gambar secara real-time. Lihat perbandingan gambar asli dan hasil deteksi!")
+        
+        # Contoh gambar deteksi (placeholder atau dummy)
+        # Asumsikan kita punya gambar contoh; jika tidak, gunakan placeholder
+        try:
+            # Gambar asli contoh (ganti dengan path gambar nyata jika ada)
+            img_original = Image.open("https://via.placeholder.com/300x200?text=Gambar+Asli").convert("RGB")
+            img_detected = Image.open("https://via.placeholder.com/300x200?text=Hasil+Deteksi+YOLO").convert("RGB")
+            
+            col_img1, col_img2 = st.columns(2)
+            with col_img1:
+                if st.button("📸 Lihat Gambar Asli", key="popup_original"):
+                    with st.popover("📸 Gambar Asli"):
+                        st.image(img_original, caption="Gambar Asli Contoh", use_container_width=True)
+                        st.write("Ini adalah gambar asli sebelum deteksi objek.")
+            with col_img2:
+                if st.button("📦 Lihat Hasil Deteksi", key="popup_detected"):
+                    with st.popover("📦 Hasil Deteksi YOLO"):
+                        st.image(img_detected, caption="Hasil Deteksi YOLO Contoh", use_container_width=True)
+                        st.write("Objek terdeteksi dengan bounding box dan label.")
+        except:
+            st.info("Gambar contoh tidak tersedia. Unggah gambar di halaman Deteksi Objek untuk melihat hasil nyata!")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown("#### 🧠 Klasifikasi Gambar")
+        st.write("Klasifikasikan jenis tanaman dari gambar. Dapatkan prediksi dengan probabilitas tinggi!")
+        
+        # Contoh gambar klasifikasi (placeholder atau dummy)
+        try:
+            # Gambar tanaman contoh (ganti dengan path gambar nyata jika ada)
+            img_plant = Image.open("https://via.placeholder.com/300x200?text=Gambar+Tanaman").convert("RGB")
+            
+            if st.button("🌾 Lihat Prediksi Klasifikasi", key="popup_classify"):
+                with st.popover("🌾 Prediksi Klasifikasi"):
+                    st.image(img_plant, caption="Gambar Tanaman Contoh", use_container_width=True)
+                    st.write("**Prediksi:** Jagung (Maize)")
+                    st.write("**Probabilitas:** 95.67%")
+                    st.progress(0.9567)
+        except:
+            st.info("Gambar contoh tidak tersedia. Unggah gambar di halaman Klasifikasi Gambar untuk melihat hasil nyata!")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Call to Action
+    st.markdown("---")
+    st.markdown("### 🚀 Mulai Sekarang!")
+    st.write("Pilih fitur di navigasi di atas untuk mencoba deteksi objek atau klasifikasi gambar. Aplikasi ini menggunakan AI untuk memberikan hasil akurat dan cepat!")
+    st.image("https://via.placeholder.com/800x400?text=AI+Powered+App", caption="Ilustrasi Aplikasi AI", use_container_width=True)
+
+elif st.session_state.page == "Tentang":
     st.title("📖 Tentang Aplikasi")
     
     # --- Biodata Developer ---
@@ -291,79 +389,4 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                             
                             # Tambahan: Emoji berdasarkan prediksi
                             emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-                            st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
-                            
-                            # Tambahan: Tampilkan semua probabilitas kelas
-                            st.subheader("📊 Probabilitas Semua Kelas:")
-                            for i, prob in enumerate(preds[0]):
-                                st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
-                            
-                            # Tambahan: Peringatan jika probabilitas rendah
-                            if max_prob < 0.5:
-                                st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas, fokus pada tanaman utama, atau latih ulang model.")
-                            
-                        except Exception as e:
-                            st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
-                else:
-                    st.warning("⚠️ Model Keras belum berhasil dimuat.")
-
-elif st.session_state.page == "Klasifikasi Gambar":
-    st.title("🧠 Klasifikasi Gambar")
-    st.write("Unggah gambar tanaman untuk diklasifikasikan. Model AI kami akan memprediksi jenis tanaman dengan akurasi tinggi! 🌾")
-    
-    uploaded_file = st.file_uploader("📤 Unggah gambar", type=["jpg", "jpeg", "png"], key="classify_uploader")
-
-    if uploaded_file is not None:
-        img = Image.open(uploaded_file).convert("RGB")
-        st.image(img, caption="📸 Gambar yang diunggah", use_container_width=True)
-
-        if keras_model:
-            with st.spinner("🧠 Mengklasifikasikan gambar..."):
-                try:
-                    # Sesuaikan ukuran input model
-                    input_shape = keras_model.input_shape[1:3]
-                    img_resized = img.resize(input_shape)
-
-                    # Preprocessing
-                    x = image.img_to_array(img_resized)
-                    x = np.expand_dims(x, axis=0) / 255.0
-
-                    preds = keras_model.predict(x)
-                    pred_class = np.argmax(preds, axis=1)[0]
-                    class_names = ["maize", "jute", "rice", "wheat", "sugarcane"]
-
-                    st.subheader("📊 Hasil Klasifikasi:")
-                    st.write(f"🌾 **Prediksi:** {class_names[pred_class]}")
-                    st.write(f"📈 **Probabilitas:** {np.max(preds) * 100:.2f}%")
-                    
-                    # Perbaikan: Konversi ke float untuk progress bar
-                    max_prob = float(np.max(preds))
-                    st.progress(max_prob)
-                    
-                    # Tambahan: Emoji berdasarkan prediksi
-                    emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-                    st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
-                    
-                    # Tambahan: Tampilkan semua probabilitas kelas
-                    st.subheader("📊 Probabilitas Semua Kelas:")
-                    for i, prob in enumerate(preds[0]):
-                        st.write(f"- {class_names[i]}: {prob * 100:.2f}%")
-                    
-                    # Tambahan: Peringatan jika probabilitas rendah
-                    if max_prob < 0.5:
-                        st.warning("⚠️ Probabilitas prediksi rendah. Model mungkin kurang yakin. Coba gambar yang lebih jelas, fokus pada tanaman utama, atau latih ulang model.")
-                    
-                except Exception as e:
-                    st.error(f"❌ Terjadi kesalahan saat klasifikasi: {e}")
-        else:
-            st.warning("⚠️ Model Keras belum berhasil dimuat.")
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Footer atraktif
-st.markdown("""
-    <hr>
-    <div style="text-align: center; color: #008080; font-weight: bold;">
-        Dibuat dengan ❤️ oleh Cut Nisa Shafira. © 2025 AI App.
-    </div>
-""", unsafe_allow_html=True)
+                            st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred
