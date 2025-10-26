@@ -97,6 +97,7 @@ def load_models():
                 st.error("❌ File model YOLO kosong atau rusak. Periksa file Anda.")
             else:
                 yolo_model = YOLO(yolo_path)
+                st.success("✅ Model YOLO berhasil dimuat.")
         else:
             st.warning("⚠️ File model YOLO tidak ditemukan di folder /model/")
     except Exception as e:
@@ -117,6 +118,7 @@ def load_models():
                 loss="categorical_crossentropy",
                 metrics=["accuracy"]
             )
+            st.success("✅ Model Keras berhasil dimuat.")
         else:
             st.warning("⚠️ File model Keras tidak ditemukan di folder /model/")
     except Exception as e:
