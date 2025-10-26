@@ -5,6 +5,9 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
 import os
+import pandas as pd
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 # ==========================
 # KONFIGURASI DASHBOARD
@@ -63,8 +66,8 @@ st.markdown("""
 
 st.markdown('<div class="header">🌟 Selamat Datang di Image Classification & Detection App 🌟</div>', unsafe_allow_html=True)
 
-# Navigation buttons in header
-col1, col2, col3 = st.columns(3)
+# Navigation buttons in header (updated to 4 columns)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     if st.button("🔍 Deteksi Objek (YOLO)", key="yolo"):
         st.session_state.page = "Deteksi Objek (YOLO)"
@@ -74,10 +77,17 @@ with col2:
 with col3:
     if st.button("📖 Tentang", key="about"):
         st.session_state.page = "Tentang"
+with col4:
+    if st.button("📊 Histori", key="history"):
+        st.session_state.page = "Histori"
 
 # Default page
 if "page" not in st.session_state:
     st.session_state.page = "Deteksi Objek (YOLO)"
+
+# Initialize history if not exists
+if "history" not in st.session_state:
+    st.session_state.history = []
 
 # ==========================
 # LOAD MODEL
@@ -238,6 +248,16 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                     if detections:
                         st.success(f"✅ Ditemukan {len(detections)} objek.")
                         
+                        # Simpan ke histori
+                        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        st.session_state.history.append({
+                            "timestamp": timestamp,
+                            "type": "Deteksi Objek",
+                            "result": f"{len(detections)} objek terdeteksi",
+                            "details": ", ".join([f"{label} ({conf:.2f})" for label, conf in detections]),
+                            "image": img  # Simpan gambar untuk tampilan
+                        })
+                        
                         # --- Crop Gambar Berdasarkan Bounding Box Pertama ---
                         # Ambil bounding box pertama (atau yang paling confident)
                         if len(results[0].boxes) > 0:
@@ -293,6 +313,16 @@ elif st.session_state.page == "Deteksi Objek (YOLO)":
                             emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
                             st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
                             
+                            # Simpan ke histori
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            st.session_state.history.append({
+                                "timestamp": timestamp,
+                                "type": "Klasifikasi Gambar",
+                                "result": class_names[pred_class],
+                                "details": f"Probabilitas: {max_prob * 100:.2f}%",
+                                "image": img_to_classify
+                            })
+                            
                             # Tambahan: Tampilkan semua probabilitas kelas
                             st.subheader("📊 Probabilitas Semua Kelas:")
                             for i, prob in enumerate(preds[0]):
@@ -340,9 +370,19 @@ elif st.session_state.page == "Klasifikasi Gambar":
                     max_prob = float(np.max(preds))
                     st.progress(max_prob)
                     
+                    # Simpan ke histori
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    st.session_state.history.append({
+                        "timestamp": timestamp,
+                        "type": "Klasifikasi Gambar",
+                        "result": class_names[pred_class],
+                        "details": f"Probabilitas: {max_prob * 100:.2f}%",
+                        "image": img
+                    })
+                    
                     # Tambahan: Emoji berdasarkan prediksi
-                    emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
-                    st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
+                     emoji_map = {"maize": "🌽", "jute": "🌿", "rice": "🌾", "wheat": "🌾", "sugarcane": "🍯"}
+                st.write(f"{emoji_map[class_names[pred_class]]} Wow, ini terlihat seperti {class_names[pred_class]}!")
                     
                     # Tambahan: Tampilkan semua probabilitas kelas
                     st.subheader("📊 Probabilitas Semua Kelas:")
@@ -358,6 +398,47 @@ elif st.session_state.page == "Klasifikasi Gambar":
         else:
             st.warning("⚠️ Model Keras belum berhasil dimuat.")
 
+elif st.session_state.page == "Histori":
+    st.title("📊 Histori Prediksi")
+    st.write("Lihat riwayat prediksi Anda, termasuk gambar sebelumnya dan visualisasi distribusi jenis prediksi!")
+    
+    if not st.session_state.history:
+        st.info("ℹ️ Belum ada riwayat prediksi. Lakukan deteksi objek atau klasifikasi gambar terlebih dahulu!")
+    else:
+        # Tampilkan tabel histori
+        st.subheader("📋 Tabel Riwayat Prediksi")
+        df_history = pd.DataFrame(st.session_state.history)
+        df_history = df_history.drop(columns=["image"])  # Hapus kolom image untuk tabel
+        st.dataframe(df_history, use_container_width=True)
+        
+        # Tombol clear history
+        if st.button("🗑️ Clear History", key="clear_history"):
+            st.session_state.history = []
+            st.success("✅ Histori telah dibersihkan!")
+            st.rerun()  # Refresh halaman
+        
+        # Tampilkan gambar dari histori terbaru
+        st.subheader("🖼️ Gambar dari Prediksi Terbaru")
+        if st.session_state.history:
+            latest_entry = st.session_state.history[-1]
+            st.image(latest_entry["image"], caption=f"Gambar dari {latest_entry['type']} - {latest_entry['timestamp']}", use_container_width=True)
+        
+        # Visualisasi grafik distribusi jenis prediksi
+        st.subheader("📈 Distribusi Jenis Prediksi")
+        if st.session_state.history:
+            # Hitung distribusi berdasarkan "result" (untuk klasifikasi) atau "type" (untuk deteksi)
+            results = [entry["result"] for entry in st.session_state.history if entry["type"] == "Klasifikasi Gambar"]
+            if results:
+                result_counts = pd.Series(results).value_counts()
+                fig, ax = plt.subplots()
+                result_counts.plot(kind="bar", ax=ax, color="#008080")
+                ax.set_title("Distribusi Prediksi Klasifikasi Gambar")
+                ax.set_xlabel("Jenis Tanaman")
+                ax.set_ylabel("Jumlah Prediksi")
+                st.pyplot(fig)
+            else:
+                st.info("ℹ️ Belum ada prediksi klasifikasi gambar untuk divisualisasikan.")
+
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Footer atraktif
@@ -367,3 +448,6 @@ st.markdown("""
         Dibuat dengan ❤️ oleh Cut Nisa Shafira. © 2025 AI App.
     </div>
 """, unsafe_allow_html=True)
+
+
+                    
